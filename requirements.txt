@@ -1,0 +1,11 @@
+# Framework de pruebas
+pytest==7.4.3
+pytest-cov==4.1.0  # Para cobertura de código
+pytest-html==4.1.1  # Para reportes HTML
+
+# Utilidades adicionales (opcional)
+requests==2.31.0  # Si necesitas probar APIs
+pytest-mock==3.12.0  # Para mocks en pruebas
+
+# Para integración con Jenkins (reportes JUnit)
+pytest-junit==0.0.1

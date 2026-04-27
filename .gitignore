@@ -1,7 +1,5 @@
 # =========================
-
 # 🐧 SISTEMA / GENERALES
-
 # =========================
 
 .DS_Store
@@ -10,49 +8,50 @@ Thumbs.db
 *.tmp
 *.swp
 *.swo
+*~
+*.backup
+*.old
+*.orig
+*.save
 
 # =========================
-
 # 🧠 VISUAL STUDIO CODE
-
 # =========================
 
 .vscode/
 .history/
+*.code-workspace
 
 # =========================
-
 # 🐙 GIT
-
 # =========================
 
 .git/
 .gitignore
+.gitattributes
 
 # =========================
-
 # 🐳 DOCKER
-
 # =========================
 
 docker-data/
 *.tar
 *.img
+docker-compose.override.yml
+.dockerignore
 
 # =========================
-
 # ⚙️ JENKINS (MUY IMPORTANTE)
-
 # =========================
 
 jenkins/
 jenkins_home/
 *.jenkins
+.jenkins/
+workspace/
 
 # =========================
-
 # 🔐 ARCHIVOS SENSIBLES
-
 # =========================
 
 .env
@@ -62,47 +61,86 @@ jenkins_home/
 *.crt
 secrets/
 *.secret
+*.password
+*.credentials
+*.token
 
 # =========================
-
 # 📦 NODE / CYPRESS
-
 # =========================
 
 node_modules/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 package-lock.json
+yarn.lock
+.cypress-cache/
+cypress.env.json
 
 # Cypress outputs
-
 cypress/videos/
 cypress/screenshots/
 cypress/downloads/
+cypress/fixtures/example.json  # Si es el ejemplo por defecto
+cypress/results/
+cypress/reports/
+.nyc_output/
+coverage/
 
 # =========================
+# 🐍 PYTHON (para saludo.py y pytest)
+# =========================
 
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+*.pyc
+*.pyo
+*.pyd
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =========================
 # 📬 POSTMAN / NEWMAN
-
 # =========================
 
 api-testing/newman/results-newman/
+api-testing/newman/report.*
 *.postman_environment.json.backup
+*.postman_collection.json.backup
+newman/
 
 # =========================
-
 # 🧪 JMETER
-
 # =========================
 
 *.jtl
 *.csv
-results/
-results-docker/
+*.jmx.bak
+performance/jmeter/results/
+performance/jmeter/results-docker/
+jmeter.log
+*.jmx~
 
 # =========================
-
 # 🔒 OWASP ZAP
-
 # =========================
 
 security/docker-report/reporte.html
@@ -110,32 +148,116 @@ security/zap-analysis/*.session*
 security/zap-analysis/*.data
 security/zap-analysis/*.properties
 security/zap-analysis/*.script
+security/zap-analysis/*.log
+zap.out
+*.xml
+*.pcap
 
 # =========================
+# 📸 CAPTURAS Y EVIDENCIAS
+# =========================
 
+bug-reports/evidence/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.mp4
+*.mov
+screenshots/
+videos/
+
+# =========================
 # 📊 REPORTES GENERALES
-
 # =========================
 
 reports/
+test-reports/
 *.html
 *.json
 *.xml
+*.junit
+results-docker/
+!results-docker/.gitkeep  # Opcional: mantener carpeta vacía
 
 # =========================
-
 # 🧾 LOGS
-
 # =========================
 
 logs/
 *.log
+*.log.*
 
 # =========================
-
-# 🧠 CACHE
-
+# 🧠 CACHÉS Y TEMPORALES
 # =========================
 
 .cache/
 tmp/
+temp/
+*.cache
+*.temp
+.cache-loader/
+.eslintcache
+.parcel-cache/
+
+# =========================
+# 📦 ARCHIVOS DE RESPALDO DE OFFICE
+# =========================
+
+*.ods.bak
+*.xlsb
+~$*.ods
+~$*.xlsx
+
+# =========================
+# 🧪 POSTMAN (específico para tu estructura)
+# =========================
+
+api-testing/postman/*.backup
+api-testing/postman/tmp/
+
+# =========================
+# 🔧 HERRAMIENTAS DE PERFORMANCE
+# =========================
+
+performance/blazemeter/evidence/
+performance/blazemeter/reports/
+.jmeter/
+
+# =========================
+# 📁 ARCHIVOS COMPRIMIDOS (opcional)
+# =========================
+
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# =========================
+# 🎯 ACCESIBILIDAD (axe, lighthouse)
+# =========================
+
+accesibility-testing/lighthouse/report/
+accesibility-testing/axe/report/
+*.lighthouse.json
+
+# =========================
+# 🔧 CONFIGURACIÓN LOCAL
+# =========================
+
+*.local
+*.local.*
+config.local.*
+*.user
+*.user.*
+
+# =========================
+# 🐚 SCRIPTS DE RESPUESTO (backups comunes)
+# =========================
+
+*.sh.save
+*.sh.bak
+*.py.save
+*.py.bak
