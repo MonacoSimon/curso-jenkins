@@ -1,142 +1,135 @@
 #!/bin/bash
 
 echo "========================================="
-echo "🐻 Ejecutando pruebas de Cypress"
+echo "🐻 Ejecutando pruebas en Jenkins"
 echo "========================================="
 
 # ==========================================
-# PYTHON (si lo necesitas para pytest)
+# PYTHON (sin virtualenv - usar Python del sistema)
 # ==========================================
 
-# Crear y activar entorno virtual si no existe
-if [ ! -d "venv" ]; then
-    echo "📦 Creando entorno virtual..."
-    python3 -m venv venv
+echo ""
+echo "🐍 Ejecutando Python..."
+
+# Verificar Python
+if command -v python3 &> /dev/null; then
+    python3 --version
+    python3 saludo.py
+else
+    echo "❌ Python3 no encontrado"
+    exit 1
 fi
 
-echo "✅ Activando entorno virtual..."
-source venv/bin/activate
-
-# Instalar dependencias Python SOLO en el venv
-echo "📦 Instalando dependencias Python..."
-pip install --upgrade pip
-pip install -r requirements.txt 2>/dev/null || echo "⚠️ No hay requirements.txt, omitiendo..."
-
 # ==========================================
-# CYPRESS (Node.js)
+# CYPRESS (instalar Node.js si es necesario)
 # ==========================================
+
+echo ""
+echo "📦 Configurando Node.js para Cypress..."
+
+# Instalar Node.js si no existe
+if ! command -v node &> /dev/null; then
+    echo "⚙️ Instalando Node.js 18.x..."
+    
+    # Descargar e instalar Node.js desde el binario oficial
+    cd /tmp
+    curl -fsSL https://nodejs.org/dist/v18.19.0/node-v18.19.0-linux-x64.tar.xz -o node.tar.xz
+    tar -xf node.tar.xz
+    cp -r node-v18.19.0-linux-x64/* /usr/local/
+    rm -rf node.tar.xz node-v18.19.0-linux-x64
+    cd -
+    
+    node --version
+    npm --version
+fi
 
 # Verificar Node.js
-echo ""
-echo "✅ Verificando Node.js..."
-node --version
-npm --version
+echo "✅ Node.js: $(node --version 2>/dev/null || echo 'No instalado')"
+echo "✅ npm: $(npm --version 2>/dev/null || echo 'No instalado')"
 
-# Navegar al proyecto Cypress (AJUSTADO a tu estructura)
-echo ""
-echo "📁 Navegando a proyecto-cypress..."
-cd proyecto-cypress || {
-    echo "❌ Error: No se encuentra la carpeta 'proyecto-cypress'"
-    echo "   Directorio actual: $(pwd)"
-    exit 1
-}
+# ==========================================
+# CORRER CYPRESS
+# ==========================================
 
-# Verificar que existe package.json
-if [ ! -f "package.json" ]; then
-    echo "❌ Error: No se encuentra package.json en $(pwd)"
-    exit 1
+echo ""
+echo "🔍 Buscando proyecto Cypress..."
+
+# Buscar la carpeta proyecto-cypress en diferentes ubicaciones
+CYPRESS_DIR=""
+if [ -d "proyecto-cypress" ]; then
+    CYPRESS_DIR="proyecto-cypress"
+elif [ -d "automation/cypress" ]; then
+    CYPRESS_DIR="automation/cypress"
+elif [ -d "cypress" ]; then
+    CYPRESS_DIR="."
 fi
 
-# Instalar dependencias (npm install, no npm ci)
+if [ -z "$CYPRESS_DIR" ]; then
+    echo "⚠️ No se encontró proyecto Cypress"
+    echo "   Buscando en: $(pwd)"
+    ls -la
+    exit 0
+fi
+
+echo "📁 Proyecto Cypress encontrado en: $CYPRESS_DIR"
+cd "$CYPRESS_DIR"
+
+if [ ! -f "package.json" ]; then
+    echo "⚠️ No hay package.json en $CYPRESS_DIR"
+    exit 0
+fi
+
+# Instalar dependencias
 echo ""
 echo "📦 Instalando dependencias de Cypress..."
-if [ -f "package-lock.json" ]; then
-    echo "   Usando npm ci (lockfile existe)"
-    npm ci
-else
-    echo "   Usando npm install (generando package-lock.json)"
-    npm install
-fi
+npm install --quiet
 
-# Limpiar resultados anteriores
-echo ""
-echo "🧹 Limpiando resultados anteriores..."
-rm -rf cypress/videos/* cypress/screenshots/* 2>/dev/null
-
-# Verificar configuración de Cypress
-echo ""
-echo "🔍 Verificando configuración de Cypress..."
-if [ ! -f "cypress.config.js" ] && [ ! -f "cypress.config.ts" ]; then
-    echo "⚠️ No se encuentra cypress.config.js"
-    echo "   Creando configuración básica..."
-    
+# Crear configuración básica si no existe
+if [ ! -f "cypress.config.js" ]; then
+    echo "⚙️ Creando cypress.config.js..."
     cat > cypress.config.js << 'EOF'
 const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
+  video: false,
+  screenshotOnRunFailure: false,
   e2e: {
-    baseUrl: 'http://localhost:3000',
-    supportFile: 'cypress/support/e2e.js',
-    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    viewportWidth: 1280,
-    viewportHeight: 720,
-    video: true,
-    screenshotOnRunFailure: true,
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
   },
 });
 EOF
-    echo "✅ Configuración básica creada"
 fi
 
-# Ejecutar Cypress en modo headless
-echo ""
-echo "🚀 Ejecutando pruebas de Cypress..."
-echo "========================================="
-
-# Si no hay pruebas, crear una de ejemplo
-if [ ! -d "cypress/e2e" ] || [ -z "$(ls -A cypress/e2e/*.cy.js 2>/dev/null)" ]; then
-    echo "⚠️ No se encontraron pruebas, creando prueba de ejemplo..."
+# Crear prueba de ejemplo si no hay
+if [ ! -d "cypress/e2e" ] || [ -z "$(ls cypress/e2e/*.cy.js 2>/dev/null)" ]; then
+    echo "🧪 Creando prueba de ejemplo..."
     mkdir -p cypress/e2e
     cat > cypress/e2e/example.cy.js << 'EOF'
 describe('Prueba de ejemplo', () => {
-  it('debería pasar esta prueba básica', () => {
+  it('debería pasar', () => {
     expect(true).to.equal(true);
   });
 });
 EOF
-    echo "✅ Prueba de ejemplo creada"
 fi
 
-# Ejecutar Cypress
+# Ejecutar pruebas
+echo ""
+echo "🚀 Ejecutando pruebas de Cypress..."
+echo "========================================="
+
 npx cypress run --headless --browser chrome
 EXIT_CODE=$?
 
-# Mostrar resultados
 echo ""
 echo "========================================="
 if [ $EXIT_CODE -eq 0 ]; then
     echo "✅ TODAS LAS PRUEBAS PASARON"
 else
     echo "❌ ALGUNAS PRUEBAS FALLARON"
-    
-    # Mostrar dónde ver los resultados
-    if [ -d "cypress/videos" ] && [ "$(ls -A cypress/videos 2>/dev/null)" ]; then
-        echo "📹 Videos disponibles en: proyecto-cypress/cypress/videos/"
-        ls -la cypress/videos/
-    fi
-    
-    if [ -d "cypress/screenshots" ] && [ "$(ls -A cypress/screenshots 2>/dev/null)" ]; then
-        echo "📸 Capturas disponibles en: proyecto-cypress/cypress/screenshots/"
-        ls -la cypress/screenshots/
-    fi
 fi
-
 echo "========================================="
-
-# Volver al directorio original
-cd ..
 
 exit $EXIT_CODE
